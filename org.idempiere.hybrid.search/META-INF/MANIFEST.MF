@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: iDempiere Hybrid Search
+Bundle-SymbolicName: org.idempiere.hybrid.search
+Bundle-Vendor: iDempiere Community
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: com.google.gson,
+ com.sun.jna;version="5.14.0",
+ org.adempiere.plugin.utils,
+ org.apache.commons.codec,
+ org.apache.commons.compress,
+ org.apache.commons.io,
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.component;version="1.5.1",
+ org.osgi.service.component.annotations;version="1.5.1",
+ org.osgi.service.event;version="1.4.1",
+ org.slf4j;version="2.0.16"
+Export-Package: org.idempiere.hybrid.search,
+ org.idempiere.hybrid.search.model
+Require-Bundle: org.adempiere.base
+Bundle-ClassPath: .,
+ lib/api.jar,
+ lib/langchain4j-core.jar,
+ lib/langchain4j-embeddings.jar,
+ lib/onnxruntime.jar,
+ lib/tokenizers.jar,
+ lib/langchain4j.jar,
+ lib/opennlp-tools.jar
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.idempiere.hybrid.search.Activator
+Automatic-Module-Name: org.idempiere.hybrid.search

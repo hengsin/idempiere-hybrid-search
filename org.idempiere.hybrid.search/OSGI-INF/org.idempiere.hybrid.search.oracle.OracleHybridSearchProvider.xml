@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.idempiere.hybrid.search.oracle.OracleHybridSearchProvider">
+   <implementation class="org.idempiere.hybrid.search.oracle.OracleHybridSearchProvider"/>
+   <service>
+      <provide interface="org.adempiere.base.search.ISearchProvider"/>
+      <provide interface="org.idempiere.hybrid.search.IHybridSearchProvider"/>
+   </service>
+   <reference bind="bindEmbeddingService" cardinality="0..1" interface="org.idempiere.hybrid.search.IEmbeddingService" name="EmbeddingService" policy="dynamic" target="(|(database=Oracle)(database=All))" unbind="unbindEmbeddingService"/>
+</scr:component>

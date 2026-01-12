@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.idempiere.hybrid.search.postgres.PgAiEmbeddingService">
+   <property name="service.ranking" type="Integer" value="0"/>
+   <property name="database" value="PostgreSQL"/>
+   <implementation class="org.idempiere.hybrid.search.postgres.PgAiEmbeddingService"/>
+   <service>
+      <provide interface="org.idempiere.hybrid.search.IEmbeddingService"/>
+   </service>
+</scr:component>
