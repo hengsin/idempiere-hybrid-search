@@ -60,6 +60,9 @@ import com.google.gson.JsonParser;
 
 import dev.langchain4j.data.segment.TextSegment;
 
+import static org.adempiere.base.markdown.IMarkdownRenderer.MARKDOWN_CLOSING_TAG;
+import static org.adempiere.base.markdown.IMarkdownRenderer.MARKDOWN_OPENING_TAG;
+
 @Component(service = { ISearchProvider.class, IHybridSearchProvider.class }, immediate = true)
 public class PostgreSQLHybridSearchProvider implements IHybridSearchProvider {
 
@@ -139,7 +142,7 @@ public class PostgreSQLHybridSearchProvider implements IHybridSearchProvider {
 	           .append(" FROM HYS_SearchIndex_Embedding JOIN HYS_SearchIndex USING (HYS_SearchIndex_ID)")
 	           .append(" WHERE AD_Table_ID=? AND AD_Client_ID IN (0, ?) AND AD_Language=? AND HYS_IndexStatus='I' AND AD_SearchDefinition_ID=?")	  
 	           .append(" ORDER BY similarity DESC LIMIT ?),")
-	           .append(" vector_score AS (SELECT id, Max(similarity) as similarity, ContentText")
+	           .append(" vector_score AS (SELECT id, Sum(similarity) as similarity, ContentText")
 	           .append(" FROM vector_search")
 	           .append(" GROUP BY id, ContentText")
 	           .append(" LIMIT ?),")
@@ -217,7 +220,10 @@ public class PostgreSQLHybridSearchProvider implements IHybridSearchProvider {
                 int id = rs.getInt(1);
                 double rank = rs.getDouble(2);
                 SearchResult result = new SearchResult();
-                result.setLabel(rs.getString(3));
+                StringBuilder contentText = new StringBuilder(MARKDOWN_OPENING_TAG)
+                		.append(rs.getString(3))
+                		.append(MARKDOWN_CLOSING_TAG);
+                result.setLabel(contentText.toString());
                 result.setRecordId(id);
                 if (window != null) {
                     result.setWindowName(window.get_Translation("Name"));
@@ -226,6 +232,7 @@ public class PostgreSQLHybridSearchProvider implements IHybridSearchProvider {
                 result.setTableName(table.getTableName());
 
                 Map<String, Object> valueMap = new HashMap<String, Object>();
+                valueMap.put("score", rank);
                 result.setValueMap(valueMap);
                 result.setRelevanceScore(rank);
 

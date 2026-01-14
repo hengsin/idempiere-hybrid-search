@@ -173,8 +173,8 @@ public class UpdateIndex extends SvrProcess {
 						if (colVal == null) continue;
 						
 						if (content.length() > 0)
-							content.append(".\n");
-						content.append(colName).append(": ").append(colVal.toString());
+							content.append("<br/>");
+						content.append("**").append(colName).append(":** ").append(colVal.toString());
 						
 						JsonElement newVal = null;
 						if (colVal instanceof Number n)
@@ -218,7 +218,7 @@ public class UpdateIndex extends SvrProcess {
 		}
 		if (val != null) {
 			if (content.length() > 0)
-				content.append(".\n");
+				content.append("<br/>");
 			String label = column.get_Translation("Name", index.getAD_Language());
 			String text = null;
 			if (val instanceof Integer id && DisplayType.isLookup(column.getAD_Reference_ID())) {
@@ -228,7 +228,7 @@ public class UpdateIndex extends SvrProcess {
 			} else {
 				text = val.toString();
 			}
-			content.append(label).append(": ").append(text);
+			content.append("**").append(label).append(":** ").append(text);
 			if (DisplayType.isNumeric(column.getAD_Reference_ID()) && val instanceof Number numberVal)
 				json.addProperty(label, numberVal);
 			else if (DisplayType.isDate(column.getAD_Reference_ID()) && val instanceof java.sql.Timestamp ts)

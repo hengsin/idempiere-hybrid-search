@@ -33,6 +33,7 @@ import org.compiere.model.MTable;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.idempiere.hybrid.search.model.MSearchColumn;
 import org.idempiere.hybrid.search.model.MSearchIndex;
 
@@ -63,10 +64,12 @@ public class CreateIndex extends SvrProcess {
 		StringBuilder sqlBuilder = new StringBuilder("SELECT AD_Client_ID, AD_Org_ID");
 		sqlBuilder.append(",").append(table.getTableName()).append("_ID");
 		sqlBuilder.append(" FROM ").append(table.getTableName());
-		sqlBuilder.append(" WHERE IsActive='Y'");
-		sqlBuilder.append(" AND ").append(table.getTableName())
+		sqlBuilder.append(" WHERE ").append(table.getTableName())
 			.append("_ID NOT IN (SELECT Record_ID FROM HYS_SearchIndex WHERE AD_SearchDefinition_ID=?")
 			.append(" AND AD_Table_ID=? AND AD_Language=?").append(")");
+		if (!Util.isEmpty(msd.getQuery(), true)) {
+			sqlBuilder.append(" AND (").append(msd.getQuery()).append(")");
+		}
 		String sql = sqlBuilder.toString();
 		sql = DB.getDatabase().addPagingSQL(sql, 1, 1001);
 		int inserted = 0;

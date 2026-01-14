@@ -15,6 +15,7 @@ import org.compiere.model.Query;
 import org.compiere.model.ServerStateChangeEvent;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
+import org.compiere.util.Util;
 import org.idempiere.hybrid.search.model.I_HYS_SearchIndex;
 import org.idempiere.hybrid.search.model.MSearchColumn;
 import org.idempiere.hybrid.search.model.MSearchIndex;
@@ -48,17 +49,31 @@ public class HybridSearchEventHandler extends AbstractEventHandler {
 		for (MSearchDefinition msd : searchDefinitions) {
 			if (msd.getAD_Table_ID() != po.get_Table_ID())
 				continue;
-			if (type.equals(IEventTopics.PO_AFTER_NEW)) {
+			if (type.equals(IEventTopics.PO_POST_CREATE)) {
 				handleAdd(msd, po);
-			} else if (type.equals(IEventTopics.PO_AFTER_CHANGE)) {
+			} else if (type.equals(IEventTopics.PO_POST_UPADTE)) {
 				handleChange(msd, po);
-			} else if (type.equals(IEventTopics.PO_AFTER_DELETE)) {
+			} else if (type.equals(IEventTopics.PO_POST_DELETE)) {
 				handleDelete(msd, po);
 			}
 		}
 	}
 
 	private void handleAdd(MSearchDefinition msd, PO po) {
+		int id = po.get_ID();
+		if (id > 0 && po.get_KeyColumns().length == 1) {
+			if (!Util.isEmpty(msd.getQuery(), true)) {			
+				String whereClause = po.get_KeyColumns()[0] + "=? AND (" + msd.getQuery() + ")";
+				int count = new Query(Env.getCtx(), po.get_TableName(), whereClause, null)
+						.setParameters(id)
+						.count();
+				if (count == 0)
+					return;
+			}
+		} else {
+			return;
+		}
+		
 		ArrayList<String> languages = Env.getLoginLanguages();
 		for (String lang : languages) {
 			MSearchIndex index = new MSearchIndex(po.getCtx(), 0, po.get_TrxName());
@@ -84,6 +99,20 @@ public class HybridSearchEventHandler extends AbstractEventHandler {
 		if (!match)
 			return;
 
+		int id = po.get_ID();
+		if (id > 0 && po.get_KeyColumns().length == 1) {
+			if (!Util.isEmpty(msd.getQuery(), true)) {			
+				String whereClause = po.get_KeyColumns()[0] + "=? AND (" + msd.getQuery() + ")";
+				int count = new Query(Env.getCtx(), po.get_TableName(), whereClause, null)
+						.setParameters(id)
+						.count();
+				if (count == 0)
+					return;
+			}
+		} else {
+			return;
+		}
+		
 		ArrayList<String> languages = Env.getLoginLanguages();
 		for (String lang : languages) {
 			MSearchIndex index = new Query(po.getCtx(), I_HYS_SearchIndex.Table_Name,
@@ -165,9 +194,9 @@ public class HybridSearchEventHandler extends AbstractEventHandler {
 	}
 
 	private void registerEvents(MSearchDefinition msd) {
-		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_AFTER_NEW);
-		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_AFTER_CHANGE);
-		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_AFTER_DELETE);
+		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_POST_CREATE);
+		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_POST_UPADTE);
+		registerTableEvent(MTable.getTableName(Env.getCtx(), msd.getAD_Table_ID()), IEventTopics.PO_POST_DELETE);
 	}
 
 	public void postAdd(MSearchDefinition msd) {
