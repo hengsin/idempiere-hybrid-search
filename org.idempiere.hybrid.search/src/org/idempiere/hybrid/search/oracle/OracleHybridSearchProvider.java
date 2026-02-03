@@ -107,7 +107,7 @@ public class OracleHybridSearchProvider implements IHybridSearchProvider {
         float[] embedding = null;
         if (embeddingService != null) {
             try {
-            	String formattedQuery = "task: retrieval | query: " + searchString;
+            	String formattedQuery = "task: search result | query: " + searchString;
             	embedding = embeddingService.generateEmbedding(formattedQuery);
             } catch (Exception e) {
                 log.log(Level.WARNING, "Failed to generate embedding: " + e.getMessage(), e);
@@ -143,9 +143,10 @@ public class OracleHybridSearchProvider implements IHybridSearchProvider {
 	           .append(" ORDER BY rank ASC FETCH FIRST ? ROWS ONLY),");
 	            
             // convert rank to relevance score (higher is better)
-            sql.append(" rrf AS (SELECT text_search.id, 1.0 / (60+text_search.rank) as score, text_search.ContentText as ContentText FROM text_search") 
+            // add higher weight to vector search
+            sql.append(" rrf AS (SELECT text_search.id, (1.0 / (60+text_search.rank))*1.1 as score, text_search.ContentText as ContentText FROM text_search") 
                 .append(" UNION ALL")
-                .append(" SELECT vector_rank.id, 1.0 / (60+vector_rank.rank) as score, vector_rank.ContentText as ContentText FROM vector_rank)");
+                .append(" SELECT vector_rank.id, (1.0 / (60+vector_rank.rank))*1.7 as score, vector_rank.ContentText as ContentText FROM vector_rank)");
             
             // combine full text and vector search results
             sql.append(" SELECT rrf.id as id, Sum(rrf.score) as score, rrf.ContentText")
@@ -245,6 +246,7 @@ public class OracleHybridSearchProvider implements IHybridSearchProvider {
         			VALUES (?, ?, ?, ?)
         			""";
         	JsonObject json = JsonParser.parseString(index.getJsonData()).getAsJsonObject();
+        	StringBuilder contentBuilder = new StringBuilder();
         	for(String key : json.keySet()) {
         		JsonElement element = json.get(key);
         		String segment = null;
@@ -258,20 +260,22 @@ public class OracleHybridSearchProvider implements IHybridSearchProvider {
         		} else {
         			segment = key + ": " + element.toString();
         		}
-        		
-        		List<TextSegment> segments = embeddingService.splitToSegments(segment);
-        		for(TextSegment textSegment : segments) {
-		            try {
-	        			String t = textSegment.text();
-						DB.executeUpdateEx(insertSQL, new Object[] {
-								index.getHYS_SearchIndex_ID(),
-								toVectorString(embeddingService.generateEmbedding("task: retrieval | document: " + t)), t, new Timestamp(System.currentTimeMillis())
-						}, index.get_TrxName());
-		            } catch (Exception e) {
-						log.log(Level.SEVERE, e.getLocalizedMessage(), e);
-					}
-		        }
+        		if (contentBuilder.length() > 0)
+					contentBuilder.append("\n");
+				contentBuilder.append(segment);
 		    }
+        	List<TextSegment> segments = embeddingService.splitToSegments(contentBuilder.toString());
+    		for(TextSegment textSegment : segments) {
+        		try {
+        			String t = textSegment.text();
+					DB.executeUpdateEx(insertSQL, new Object[] {
+							index.getHYS_SearchIndex_ID(),
+							toVectorString(embeddingService.generateEmbedding("title: none | text: " + t)), t, new Timestamp(System.currentTimeMillis())
+					}, index.get_TrxName());
+				} catch (Exception e) {
+					log.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				}
+    		}
         }
     }
 

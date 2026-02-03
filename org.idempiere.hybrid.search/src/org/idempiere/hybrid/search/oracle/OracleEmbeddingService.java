@@ -38,7 +38,13 @@ import org.osgi.service.component.annotations.Component;
 
 import dev.langchain4j.data.segment.TextSegment;
 
-@Component(service = IEmbeddingService.class, immediate = true, property = {"service.ranking:Integer=0", "database=Oracle"})
+/**
+ * Oracle vector embedding service using Oracle's VECTOR_EMBEDDING function.
+ * https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/vector_embedding.html
+ * Disable for now, not tested yet.
+ */
+@Component(service = IEmbeddingService.class, immediate = true, 
+	property = {"service.ranking:Integer=0", "database=Oracle"}, enabled = false)
 public class OracleEmbeddingService implements IEmbeddingService {
 
     private static final String DEFAULT_MODEL = "doc_model";

@@ -63,6 +63,7 @@ public class OnnxEmbeddingService implements IEmbeddingService {
     public void activate(ComponentContext context) throws Exception {
         Bundle bundle = context.getBundleContext().getBundle();
         
+        // using https://huggingface.co/google/embeddinggemma-300m (quantized version)
         String modelDir = "lib/models/gemma/";
         
         Path modelPath = extractBundleResource(bundle, modelDir, "model_quantized.onnx");

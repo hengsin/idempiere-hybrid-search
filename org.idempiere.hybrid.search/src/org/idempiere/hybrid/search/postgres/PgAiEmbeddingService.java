@@ -38,7 +38,12 @@ import org.osgi.service.component.annotations.Component;
 
 import dev.langchain4j.data.segment.TextSegment;
 
-@Component(service = IEmbeddingService.class, immediate = true, property = {"service.ranking:Integer=0", "database=PostgreSQL"})
+/**
+ * https://github.com/timescale/pgai
+ * Disable for now, not tested yet.
+ */
+@Component(service = IEmbeddingService.class, immediate = true, 
+	property = {"service.ranking:Integer=0", "database=PostgreSQL"}, enabled = false)
 public class PgAiEmbeddingService implements IEmbeddingService {
 
     private static final String OLLAMA = "ollama";
