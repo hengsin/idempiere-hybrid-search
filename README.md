@@ -68,8 +68,8 @@ Hybrid search can also be applied to iDempiere menus, making it easier for users
 
 ## Examples
 Ready-to-use search configurations (2Pack) are provided in the `examples` folder:
-- `BPartnerSearches.zip`: Search configuration for Business Partners.
-- `MenuSearches.zip`: Search configuration for iDempiere Menus.
+- ![examples/BPartnerSearches.zip](examples/BPartnerSearches.zip): Search configuration for Business Partners.
+- ![examples/MenuSearches.zip](examples/MenuSearches.zip): Search configuration for iDempiere Menus.
 
 ## Requirements
 - iDempiere 13 or higher.
